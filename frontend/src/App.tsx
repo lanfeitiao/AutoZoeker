@@ -39,50 +39,144 @@ const App: React.FC = () => {
       });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="notion-loading">Loading...</div>;
+  if (error) return <div className="notion-error">Error: {error}</div>;
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>AutoZoeker - Second-hand Cars in NL</h1>
-      <table border={1} cellPadding={6} cellSpacing={0}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Mileage</th>
-            <th>Price</th>
-            <th>Road Value</th>
-            <th>Dealer</th>
-            <th>Phone</th>
-            <th>RDW</th>
-            <th>Bovag</th>
-            <th>Plate</th>
-            <th>Year</th>
-            <th>APK Expiry</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cars.map((car) => (
-            <tr key={car.plate}>
-              <td><a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a></td>
-              <td>{car.status}</td>
-              <td>{car.mileage}</td>
-              <td>{car.price}</td>
-              <td>{car.roadValue}</td>
-              <td>{car.dealer}</td>
-              <td>{car.phone}</td>
-              <td>{car.rdw ? 'Yes' : 'No'}</td>
-              <td>{car.bovag ? 'Yes' : 'No'}</td>
-              <td>{car.plate}</td>
-              <td>{car.year}</td>
-              <td>{car.apkExpiry}</td>
-              <td>{car.notes}</td>
+    <div className="notion-root">
+      <header className="notion-header">
+        <h1>🚗 AutoZoeker</h1>
+        <p className="notion-subtitle">Second-hand Cars in the Netherlands</p>
+      </header>
+      <div className="notion-table-container">
+        <table className="notion-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Mileage</th>
+              <th>Price</th>
+              <th>Road Value</th>
+              <th>Dealer</th>
+              <th>Phone</th>
+              <th>RDW</th>
+              <th>Bovag</th>
+              <th>Plate</th>
+              <th>Year</th>
+              <th>APK Expiry</th>
+              <th>Notes</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cars.map((car) => (
+              <tr key={car.plate} className="notion-table-row">
+                <td><a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a></td>
+                <td>{car.status}</td>
+                <td>{car.mileage.toLocaleString()}</td>
+                <td>€{car.price.toLocaleString()}</td>
+                <td>€{car.roadValue.toLocaleString()}</td>
+                <td>{car.dealer}</td>
+                <td>{car.phone}</td>
+                <td>{car.rdw ? 'Yes' : 'No'}</td>
+                <td>{car.bovag ? 'Yes' : 'No'}</td>
+                <td>{car.plate}</td>
+                <td>{car.year}</td>
+                <td>{car.apkExpiry}</td>
+                <td>{car.notes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <style>{`
+        body {
+          background: #f6f7f9;
+        }
+        .notion-root {
+          max-width: 1200px;
+          margin: 40px auto;
+          padding: 32px;
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+          font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        }
+        .notion-header {
+          margin-bottom: 32px;
+        }
+        .notion-header h1 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin: 0 0 8px 0;
+        }
+        .notion-subtitle {
+          color: #888;
+          font-size: 1.1rem;
+          margin: 0;
+        }
+        .notion-table-container {
+          overflow-x: auto;
+        }
+        .notion-table {
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+          background: #fafbfc;
+          border-radius: 12px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .notion-table th, .notion-table td {
+          padding: 12px 16px;
+          text-align: left;
+        }
+        .notion-table th {
+          background: #f3f4f6;
+          font-weight: 600;
+          color: #444;
+        }
+        .notion-table tr {
+          border-bottom: 1px solid #ececec;
+        }
+        .notion-table tr:last-child {
+          border-bottom: none;
+        }
+        .notion-table td {
+          background: #fff;
+          border-right: 1px solid #f3f4f6;
+        }
+        .notion-table td:last-child {
+          border-right: none;
+        }
+        .notion-table a {
+          color: #2d7ff9;
+          text-decoration: none;
+          font-weight: 500;
+        }
+        .notion-table a:hover {
+          text-decoration: underline;
+        }
+        .notion-loading, .notion-error {
+          text-align: center;
+          margin-top: 80px;
+          font-size: 1.3rem;
+          color: #888;
+        }
+        @media (max-width: 800px) {
+          .notion-root {
+            padding: 8px;
+          }
+          .notion-header h1 {
+            font-size: 2rem;
+          }
+          .notion-table th, .notion-table td {
+            padding: 8px 6px;
+            font-size: 0.95rem;
+          }
+        }
+        .notion-table-row:not(:last-child) td {
+          border-bottom: 1px solid #ececec;
+        }
+      `}</style>
     </div>
   );
 };
