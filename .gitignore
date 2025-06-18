@@ -28,4 +28,12 @@ Thumbs.db
 *.local
 *.log
 .idea/
-.vscode/ 
+.vscode/
+
+# Scraper output
+scraper/*.json
+scraper/*.csv
+
+# ChromeDriver binary
+scraper/chromedriver
+scraper/chromedriver.exe 
