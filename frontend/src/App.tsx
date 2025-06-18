@@ -3,12 +3,10 @@ import React, { useEffect, useState } from 'react';
 // Define the car type
 interface CarListing {
   name: string;
-  status: string;
   url: string;
   mileage: number;
   price: number;
   roadValue: number;
-  notes: string;
   phone: string;
   dealer: string;
   rdw: boolean;
@@ -30,6 +28,7 @@ const App: React.FC = () => {
         return res.json();
       })
       .then((data) => {
+        console.log(data);
         setCars(data);
         setLoading(false);
       })
@@ -53,7 +52,6 @@ const App: React.FC = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Status</th>
               <th>Mileage</th>
               <th>Price</th>
               <th>Road Value</th>
@@ -64,25 +62,26 @@ const App: React.FC = () => {
               <th>Plate</th>
               <th>Year</th>
               <th>APK Expiry</th>
-              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
-            {cars.map((car) => (
-              <tr key={car.plate} className="notion-table-row">
-                <td><a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a></td>
-                <td>{car.status}</td>
-                <td>{car.mileage.toLocaleString()}</td>
-                <td>€{car.price.toLocaleString()}</td>
-                <td>€{car.roadValue.toLocaleString()}</td>
-                <td>{car.dealer}</td>
-                <td>{car.phone}</td>
+            {cars.map((car, idx) => (
+              <tr key={car.url || idx} className="notion-table-row">
+                <td>
+                  {car.url && car.name ? (
+                    <a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a>
+                  ) : car.name ? car.name : 'N/A'}
+                </td>
+                <td>{car.mileage ? car.mileage.toLocaleString() : 'N/A'}</td>
+                <td>{car.price ? `€${car.price.toLocaleString()}` : 'N/A'}</td>
+                <td>{car.roadValue ? `€${car.roadValue.toLocaleString()}` : 'N/A'}</td>
+                <td>{car.dealer ? car.dealer : 'N/A'}</td>
+                <td>{car.phone ? car.phone : 'N/A'}</td>
                 <td>{car.rdw ? 'Yes' : 'No'}</td>
                 <td>{car.bovag ? 'Yes' : 'No'}</td>
-                <td>{car.plate}</td>
-                <td>{car.year}</td>
-                <td>{car.apkExpiry}</td>
-                <td>{car.notes}</td>
+                <td>{car.plate ? car.plate : 'N/A'}</td>
+                <td>{car.year ? car.year : 'N/A'}</td>
+                <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
               </tr>
             ))}
           </tbody>
@@ -161,6 +160,9 @@ const App: React.FC = () => {
           font-size: 1.3rem;
           color: #888;
         }
+        .notion-table-row:not(:last-child) td {
+          border-bottom: 1px solid #ececec;
+        }
         @media (max-width: 800px) {
           .notion-root {
             padding: 8px;
@@ -172,9 +174,6 @@ const App: React.FC = () => {
             padding: 8px 6px;
             font-size: 0.95rem;
           }
-        }
-        .notion-table-row:not(:last-child) td {
-          border-bottom: 1px solid #ececec;
         }
       `}</style>
     </div>

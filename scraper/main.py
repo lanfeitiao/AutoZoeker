@@ -1,6 +1,7 @@
 import json
 from bs4 import BeautifulSoup
 import requests
+import re
 
 url = (
     "https://www.gaspedaal.nl/toyota/corolla/stationwagon"
@@ -13,7 +14,21 @@ resp = requests.get(url, cookies=cookies, timeout=20)
 resp.raise_for_status()         
 html = resp.text  
 
-OUTPUT_JSON = "cars_from_next_data.json"
+OUTPUT_JSON = "gaspedaal_cars.json"
+
+def extract_model_name(text):
+    """Extracts the real model name like '1.8 Hybrid Active' from a string."""
+    if not text:
+        return None
+    # Try to find a pattern like '1.8 Hybrid Active' or '2.0 Hybrid Dynamic' etc.
+    match = re.search(r'(\d\.\d\s*Hybrid\s*[A-Za-z]+)', text)
+    if match:
+        return match.group(1).strip()
+    # Fallback: try to find 'Hybrid' and the word after
+    match = re.search(r'(Hybrid\s*[A-Za-z]+)', text)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
 
 def extract_cars_from_html(html):
     soup = BeautifulSoup(html, "html.parser")
@@ -35,11 +50,13 @@ def extract_cars_from_html(html):
     for occ in occasions:
         # Find the first portal with type 'other'
         other_portal = next((p for p in occ.get("portals", []) if p.get("type") == "other"), None)
+        model_source = occ.get("version") or occ.get("title")
+        name = extract_model_name(model_source)
         car = {
-            "version": occ.get("version"),
+            "name": name,
             "price": occ.get("price"),
             "year": occ.get("year"),
-            "km": occ.get("km"),
+            "mileage": occ.get("km"),
             "place": occ.get("place"),
             "url": other_portal["url"] if other_portal else None
         }
