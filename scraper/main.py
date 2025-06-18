@@ -1,34 +1,16 @@
 import json
 from bs4 import BeautifulSoup
-import requests
-import re
+import time
+
+from helpers import extract_model_name, extract_plate_from_url, fetch_html
 
 url = (
     "https://www.gaspedaal.nl/toyota/corolla/stationwagon"
     "?brnst=25&bmin=2020&pmax=20000&kmax=120000&srt=df-a"
 )
-
-cookies = {"authId": "8a8ec16c-8399-4950-acea-7e8458b25c9e"}
-
-resp = requests.get(url, cookies=cookies, timeout=20)
-resp.raise_for_status()         
-html = resp.text  
+cookies = {"authId": "8a8ec16c-8399-4950-acea-7e8458b25c9e"}        
 
 OUTPUT_JSON = "gaspedaal_cars.json"
-
-def extract_model_name(text):
-    """Extracts the real model name like '1.8 Hybrid Active' from a string."""
-    if not text:
-        return None
-    # Try to find a pattern like '1.8 Hybrid Active' or '2.0 Hybrid Dynamic' etc.
-    match = re.search(r'(\d\.\d\s*Hybrid\s*[A-Za-z]+)', text)
-    if match:
-        return match.group(1).strip()
-    # Fallback: try to find 'Hybrid' and the word after
-    match = re.search(r'(Hybrid\s*[A-Za-z]+)', text)
-    if match:
-        return match.group(1).strip()
-    return text.strip()
 
 def extract_cars_from_html(html):
     soup = BeautifulSoup(html, "html.parser")
@@ -48,7 +30,6 @@ def extract_cars_from_html(html):
 
     cars = []
     for occ in occasions:
-        # Find the first portal with type 'other'
         other_portal = next((p for p in occ.get("portals", []) if p.get("type") == "other"), None)
         model_source = occ.get("version") or occ.get("title")
         name = extract_model_name(model_source)
@@ -58,12 +39,15 @@ def extract_cars_from_html(html):
             "year": occ.get("year"),
             "mileage": occ.get("km"),
             "place": occ.get("place"),
-            "url": other_portal["url"] if other_portal else None
+            "url": other_portal["url"] if other_portal else None,
+            "plate": extract_plate_from_url(other_portal["url"], cookies)
         }
         cars.append(car)
+        time.sleep(1)
     return cars
 
 if __name__ == "__main__":
+    html = fetch_html(url,cookies)
     cars = extract_cars_from_html(html)
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(cars, f, ensure_ascii=False, indent=2)
