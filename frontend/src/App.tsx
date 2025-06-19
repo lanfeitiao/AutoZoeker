@@ -5,7 +5,7 @@ interface CarListing {
   name: string;
   price: string;
   year: number;
-  mileage: string;
+  mileage: number;
   place: string;
   url: string;
   plate: string;
@@ -34,6 +34,11 @@ const App: React.FC = () => {
       });
   }, []);
 
+  // Sort cars by mileage (ascending)
+  const sortedCars = [...cars].sort((a, b) => {
+    return (a.mileage || 0) - (b.mileage || 0);
+  });
+
   if (loading) return <div className="notion-loading">Loading...</div>;
   if (error) return <div className="notion-error">Error: {error}</div>;
 
@@ -48,9 +53,9 @@ const App: React.FC = () => {
           <thead>
             <tr>
               <th>Name</th>
+              <th>Mileage</th>
               <th>Price</th>
               <th>Year</th>
-              <th>Mileage</th>
               <th>Place</th>
               <th>Plate</th>
               <th>APK Expiry</th>
@@ -58,16 +63,16 @@ const App: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {cars.map((car, idx) => (
+            {sortedCars.map((car, idx) => (
               <tr key={car.url || idx} className="notion-table-row">
                 <td>
                   {car.url && car.name ? (
                     <a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a>
                   ) : car.name ? car.name : 'N/A'}
                 </td>
+                <td>{car.mileage ? car.mileage.toLocaleString() : 'N/A'}</td>
                 <td>{car.price ? `€${car.price}` : 'N/A'}</td>
                 <td>{car.year ? car.year : 'N/A'}</td>
-                <td>{car.mileage ? car.mileage : 'N/A'}</td>
                 <td>{car.place ? car.place : 'N/A'}</td>
                 <td>{car.plate ? car.plate : 'N/A'}</td>
                 <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
