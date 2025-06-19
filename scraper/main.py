@@ -2,12 +2,21 @@ import json
 from bs4 import BeautifulSoup
 import time
 
-from helpers import extract_model_name, extract_plate_from_url, fetch_html, get_apk_expiry_from_rdw
+from helpers import (
+    fetch_html,
+    extract_model_name,
+    extract_plate_from_url,
+    normalize_plate_number,
+    get_apk_expiry_from_rdw,
+    get_Finnik_page
+)
 
 url = (
     "https://www.gaspedaal.nl/toyota/corolla/stationwagon"
     "?brnst=25&bmin=2020&pmax=20000&kmax=120000&srt=df-a"
 )
+
+# Will expire monthly
 cookies = {"authId": "8a8ec16c-8399-4950-acea-7e8458b25c9e"}        
 
 OUTPUT_JSON = "gaspedaal_cars.json"
@@ -35,6 +44,7 @@ def extract_cars_from_html(html):
         name = extract_model_name(model_source)
         url = other_portal["url"] if other_portal else None
         plate = extract_plate_from_url(url, cookies)
+        normalize_plate = normalize_plate_number(plate)
         car = {
             "name": name,
             "price": occ.get("price"),
@@ -43,7 +53,8 @@ def extract_cars_from_html(html):
             "place": occ.get("place"),
             "url": url,
             "plate": plate,
-            "apkExpiry": get_apk_expiry_from_rdw(plate)
+            "apkExpiry": get_apk_expiry_from_rdw(normalize_plate),
+            "finnikUrl": get_Finnik_page(normalize_plate)
         }
         cars.append(car)
         time.sleep(1)

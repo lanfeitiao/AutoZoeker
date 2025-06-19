@@ -2,6 +2,9 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
+def normalize_plate_number(plate):
+    return plate.replace('-', '').upper()
+
 def extract_model_name(text):
     """Extracts the real model name like '1.8 Hybrid Active' from a string."""
     if not text:
@@ -38,9 +41,8 @@ def extract_plate_from_url(url, cookies):
         return val.get_text(strip=True)
     return None
 
-def get_apk_expiry_from_rdw(plate):
-    clean_plate = plate.replace('-', '').upper()
-    url = f"https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={clean_plate}"
+def get_apk_expiry_from_rdw(normalize_plate):
+    url = f"https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={normalize_plate}"
     try:
         resp = requests.get(url, timeout=10)
         if resp.status_code == 200:
@@ -49,5 +51,9 @@ def get_apk_expiry_from_rdw(plate):
                 raw = data[0]['vervaldatum_apk']
                 return f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
     except Exception as e:
-        print(f"Error fetching APK for {plate}: {e}")
+        print(f"Error fetching APK for {normalize_plate}: {e}")
     return None
+
+def get_Finnik_page(normalize_plate):
+    url = f"https://finnik.nl/kenteken/{normalize_plate}/gratis"
+    return url

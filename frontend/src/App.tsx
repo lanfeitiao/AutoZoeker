@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
-// Define the car type
+// Define the car type based on the new JSON fields
 interface CarListing {
   name: string;
-  url: string;
-  mileage: number;
-  price: number;
-  roadValue: number;
-  phone: string;
-  dealer: string;
-  rdw: boolean;
-  bovag: boolean;
-  plate: string;
+  price: string;
   year: number;
-  apkExpiry: string;
+  mileage: string;
+  place: string;
+  url: string;
+  plate: string;
+  apkExpiry?: string;
+  finnikUrl?: string;
 }
 
 const App: React.FC = () => {
@@ -28,7 +25,6 @@ const App: React.FC = () => {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
         setCars(data);
         setLoading(false);
       })
@@ -52,16 +48,13 @@ const App: React.FC = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Mileage</th>
               <th>Price</th>
-              <th>Road Value</th>
-              <th>Dealer</th>
-              <th>Phone</th>
-              <th>RDW</th>
-              <th>Bovag</th>
-              <th>Plate</th>
               <th>Year</th>
+              <th>Mileage</th>
+              <th>Place</th>
+              <th>Plate</th>
               <th>APK Expiry</th>
+              <th>Finnik</th>
             </tr>
           </thead>
           <tbody>
@@ -72,16 +65,17 @@ const App: React.FC = () => {
                     <a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a>
                   ) : car.name ? car.name : 'N/A'}
                 </td>
-                <td>{car.mileage ? car.mileage.toLocaleString() : 'N/A'}</td>
-                <td>{car.price ? `€${car.price.toLocaleString()}` : 'N/A'}</td>
-                <td>{car.roadValue ? `€${car.roadValue.toLocaleString()}` : 'N/A'}</td>
-                <td>{car.dealer ? car.dealer : 'N/A'}</td>
-                <td>{car.phone ? car.phone : 'N/A'}</td>
-                <td>{car.rdw ? 'Yes' : 'No'}</td>
-                <td>{car.bovag ? 'Yes' : 'No'}</td>
-                <td>{car.plate ? car.plate : 'N/A'}</td>
+                <td>{car.price ? `€${car.price}` : 'N/A'}</td>
                 <td>{car.year ? car.year : 'N/A'}</td>
+                <td>{car.mileage ? car.mileage : 'N/A'}</td>
+                <td>{car.place ? car.place : 'N/A'}</td>
+                <td>{car.plate ? car.plate : 'N/A'}</td>
                 <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
+                <td>
+                  {car.finnikUrl ? (
+                    <a href={car.finnikUrl} target="_blank" rel="noopener noreferrer">View</a>
+                  ) : 'N/A'}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -92,7 +86,7 @@ const App: React.FC = () => {
           background: #f6f7f9;
         }
         .notion-root {
-          max-width: 1200px;
+          max-width: 900px;
           margin: 40px auto;
           padding: 32px;
           background: #fff;
@@ -133,11 +127,8 @@ const App: React.FC = () => {
           font-weight: 600;
           color: #444;
         }
-        .notion-table tr {
+        .notion-table-row:not(:last-child) td {
           border-bottom: 1px solid #ececec;
-        }
-        .notion-table tr:last-child {
-          border-bottom: none;
         }
         .notion-table td {
           background: #fff;
@@ -159,9 +150,6 @@ const App: React.FC = () => {
           margin-top: 80px;
           font-size: 1.3rem;
           color: #888;
-        }
-        .notion-table-row:not(:last-child) td {
-          border-bottom: 1px solid #ececec;
         }
         @media (max-width: 800px) {
           .notion-root {
