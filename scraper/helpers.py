@@ -2,7 +2,6 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
-
 def extract_model_name(text):
     """Extracts the real model name like '1.8 Hybrid Active' from a string."""
     if not text:
@@ -37,4 +36,18 @@ def extract_plate_from_url(url, cookies):
     cell = soup.find("td", string=lambda t: t and t.strip().lower() == "kenteken")
     if cell and (val := cell.find_next_sibling("td")):
         return val.get_text(strip=True)
+    return None
+
+def get_apk_expiry_from_rdw(plate):
+    clean_plate = plate.replace('-', '').upper()
+    url = f"https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={clean_plate}"
+    try:
+        resp = requests.get(url, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data and 'vervaldatum_apk' in data[0]:
+                raw = data[0]['vervaldatum_apk']
+                return f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
+    except Exception as e:
+        print(f"Error fetching APK for {plate}: {e}")
     return None

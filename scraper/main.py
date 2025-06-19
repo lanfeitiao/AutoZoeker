@@ -2,7 +2,7 @@ import json
 from bs4 import BeautifulSoup
 import time
 
-from helpers import extract_model_name, extract_plate_from_url, fetch_html
+from helpers import extract_model_name, extract_plate_from_url, fetch_html, get_apk_expiry_from_rdw
 
 url = (
     "https://www.gaspedaal.nl/toyota/corolla/stationwagon"
@@ -33,14 +33,17 @@ def extract_cars_from_html(html):
         other_portal = next((p for p in occ.get("portals", []) if p.get("type") == "other"), None)
         model_source = occ.get("version") or occ.get("title")
         name = extract_model_name(model_source)
+        url = other_portal["url"] if other_portal else None
+        plate = extract_plate_from_url(url, cookies)
         car = {
             "name": name,
             "price": occ.get("price"),
             "year": occ.get("year"),
             "mileage": occ.get("km"),
             "place": occ.get("place"),
-            "url": other_portal["url"] if other_portal else None,
-            "plate": extract_plate_from_url(other_portal["url"], cookies)
+            "url": url,
+            "plate": plate,
+            "apkExpiry": get_apk_expiry_from_rdw(plate)
         }
         cars.append(car)
         time.sleep(1)
