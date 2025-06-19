@@ -45,13 +45,17 @@ def extract_cars_from_html(html):
         url = other_portal["url"] if other_portal else None
         plate = extract_plate_from_url(url, cookies)
         normalize_plate = normalize_plate_number(plate)
+        price_str = str(occ.get("price") or "0")
+        price_num = int(''.join(filter(str.isdigit, price_str))) if price_str else 0
         mileage_str = str(occ.get("km") or "0")
         mileage_num = int(''.join(filter(str.isdigit, mileage_str))) if mileage_str else 0
         car = {
             "name": name,
-            "price": occ.get("price"),
+            "price": price_str,         # for display
+            "priceNum": price_num,      # for sorting
             "year": occ.get("year"),
-            "mileage": mileage_num,
+            "mileage": mileage_str,     # for display
+            "mileageNum": mileage_num,  # for sorting
             "place": occ.get("place"),
             "url": url,
             "plate": plate,

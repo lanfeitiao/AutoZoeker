@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 // Define the car type based on the new JSON fields
 interface CarListing {
   name: string;
-  price: string;
+  price: string;      // for display
+  priceNum: number;   // for sorting
   year: number;
-  mileage: number;
+  mileage: string;    // for display
+  mileageNum: number; // for sorting
   place: string;
   url: string;
   plate: string;
@@ -17,6 +19,8 @@ const App: React.FC = () => {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<'mileageNum' | 'priceNum'>('mileageNum');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     fetch('/api/cars')
@@ -34,9 +38,23 @@ const App: React.FC = () => {
       });
   }, []);
 
-  // Sort cars by mileage (ascending)
+  // Helper to get price as number
+  const getPriceNumber = (car: CarListing) => {
+    if (!car.price) return 0;
+    // Remove non-digit characters (except comma and dot)
+    const cleaned = car.price.replace(/[^\d.,]/g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+  };
+
+  // Sort cars by selected field and order
   const sortedCars = [...cars].sort((a, b) => {
-    return (a.mileage || 0) - (b.mileage || 0);
+    let aValue = a[sortField] || 0;
+    let bValue = b[sortField] || 0;
+    if (sortOrder === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
   });
 
   if (loading) return <div className="notion-loading">Loading...</div>;
@@ -48,6 +66,31 @@ const App: React.FC = () => {
         <h1>🚗 AutoZoeker</h1>
         <p className="notion-subtitle">Second-hand Cars in the Netherlands</p>
       </header>
+      {/* Filter/Sort Bar */}
+      <div style={{ marginBottom: 24, display: 'flex', gap: 16, alignItems: 'center' }}>
+        <label>
+          Sort by:
+          <select
+            value={sortField}
+            onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum')}
+            style={{ marginLeft: 8 }}
+          >
+            <option value="mileageNum">Mileage</option>
+            <option value="priceNum">Price</option>
+          </select>
+        </label>
+        <label>
+          Order:
+          <select
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
+            style={{ marginLeft: 8 }}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </label>
+      </div>
       <div className="notion-table-container">
         <table className="notion-table">
           <thead>
@@ -70,7 +113,7 @@ const App: React.FC = () => {
                     <a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a>
                   ) : car.name ? car.name : 'N/A'}
                 </td>
-                <td>{car.mileage ? car.mileage.toLocaleString() : 'N/A'}</td>
+                <td className="right-align">{car.mileage ? car.mileage + ' km' : 'N/A'}</td>
                 <td>{car.price ? `€${car.price}` : 'N/A'}</td>
                 <td>{car.year ? car.year : 'N/A'}</td>
                 <td>{car.place ? car.place : 'N/A'}</td>
@@ -131,6 +174,7 @@ const App: React.FC = () => {
           background: #f3f4f6;
           font-weight: 600;
           color: #444;
+          text-align: center !important;
         }
         .notion-table-row:not(:last-child) td {
           border-bottom: 1px solid #ececec;
@@ -167,6 +211,9 @@ const App: React.FC = () => {
             padding: 8px 6px;
             font-size: 0.95rem;
           }
+        }
+        .right-align {
+          text-align: right !important;
         }
       `}</style>
     </div>
