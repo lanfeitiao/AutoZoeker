@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-// Define the car type based on the new JSON fields
 interface CarListing {
   name: string;
-  price: string;      // for display
-  priceNum: number;   // for sorting
+  price: string;      
+  priceNum: number;   
   year: number;
-  mileage: string;    // for display
-  mileageNum: number; // for sorting
+  mileage: string;    
+  mileageNum: number; 
   place: string;
   url: string;
   plate: string;
@@ -37,14 +36,6 @@ const App: React.FC = () => {
         setLoading(false);
       });
   }, []);
-
-  // Helper to get price as number
-  const getPriceNumber = (car: CarListing) => {
-    if (!car.price) return 0;
-    // Remove non-digit characters (except comma and dot)
-    const cleaned = car.price.replace(/[^\d.,]/g, '').replace(',', '.');
-    return parseFloat(cleaned) || 0;
-  };
 
   // Sort cars by selected field and order
   const sortedCars = [...cars].sort((a, b) => {
