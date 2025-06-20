@@ -3,23 +3,23 @@ from bs4 import BeautifulSoup
 import requests
 
 def normalize_plate_number(plate):
+    if not plate:
+        return None
     return plate.replace('-', '').upper()
 
 def extract_model_name(text):
     """Extracts the real model name like '1.8 Hybrid Active' from a string."""
-    if not text:
-        return None
-    # Try to find a pattern like '1.8 Hybrid Active' or '2.0 Hybrid Dynamic' etc.
-    match = re.search(r'(\d\.\d\s*Hybrid\s*[A-Za-z]+)', text)
+    endings = [
+        "Active", "Business Plus", "Business", "Comfort", "Executive", "Dynamic", "Premium", "Plus"
+    ]
+    endings_sorted = sorted(endings, key=len, reverse=True)
+    ending_pattern = "|".join([re.escape(e) for e in endings_sorted])
+    pattern = rf"(\d\.\d\s*Hybrid(?:\s+[A-Za-z]+)*\s(?:{ending_pattern}))"
+    match = re.search(pattern, text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
-    # Fallback: try to find 'Hybrid' and the word after
-    match = re.search(r'(Hybrid\s*[A-Za-z]+)', text)
-    if match:
-        return match.group(1).strip()
-    return text.strip()
 
-def fetch_html(url, cookies):
+def fetch_html_with_cookie(url, cookies):
     response = requests.get(url, cookies=cookies, timeout=15)
     if response.status_code == 200:
         return response.text
@@ -27,8 +27,17 @@ def fetch_html(url, cookies):
         print(f"Failed to fetch {url}: {response.status_code}")
         return None
 
+    
+def fetch_url(url,expect_json=False):
+    response = requests.get(url, timeout=15)
+    if response.status_code == 200:
+        return response.json() if expect_json else response.text
+    else:
+        print(f"Failed to fetch {url}: {response.status_code}")
+        return None
+
 def extract_plate_from_url(url, cookies):
-    html=fetch_html(url,cookies)
+    html=fetch_html_with_cookie(url,cookies)
     # ① data-testid
     m = re.search(r'data-testid="svg-Kenteken-([^"]+)"', html)
     if m:
@@ -57,3 +66,19 @@ def get_apk_expiry_from_rdw(normalize_plate):
 def get_Finnik_page(normalize_plate):
     url = f"https://finnik.nl/kenteken/{normalize_plate}/gratis"
     return url
+
+def get_version_name_from_finnik(original_name, plate):
+    url   = "https://finnik.nl/kenteken/"
+    params = {"licensePlateNumber": plate}
+    headers = {"User-Agent": "Mozilla/5.0"}  
+    resp = requests.get(url, params=params, headers=headers)
+    soup = BeautifulSoup(resp.text, "html.parser")
+    version_name = None
+    for row in soup.select(".row"):
+        label = row.select_one(".label")
+        if label and "Uitvoering" in label.get_text(strip=True):
+            version_name = row.select_one(".value").get_text(strip=True)
+            break
+    if version_name:
+        return version_name 
+    return original_name
