@@ -7,6 +7,9 @@ from helpers import (
     extract_plate_from_url,
     normalize_plate_number,
     get_apk_expiry_from_rdw,
+)
+
+from finnik import (
     get_Finnik_page,
     get_version_name_from_finnik,
 )

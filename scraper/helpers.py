@@ -78,25 +78,3 @@ def get_apk_expiry_from_rdw(normalize_plate: str) -> Optional[str]:
     except Exception as e:
         print(f"Error fetching APK for {normalize_plate}: {e}")
     return None
-
-
-def get_Finnik_page(normalize_plate: str) -> str:
-    url = f"https://finnik.nl/kenteken/{normalize_plate}/gratis"
-    return url
-
-
-def get_version_name_from_finnik(original_name: str, plate: str) -> str:
-    url = "https://finnik.nl/kenteken/"
-    params = {"licensePlateNumber": plate}
-    headers = {"User-Agent": "Mozilla/5.0"}
-    resp = requests.get(url, params=params, headers=headers)
-    soup = BeautifulSoup(resp.text, "html.parser")
-    version_name = None
-    for row in soup.select(".row"):
-        label = row.select_one(".label")
-        if label and "Uitvoering" in label.get_text(strip=True):
-            version_name = row.select_one(".value").get_text(strip=True)
-            break
-    if version_name:
-        return version_name
-    return original_name
