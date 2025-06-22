@@ -1,17 +1,18 @@
 import re
 import requests
 from helpers import fetch_url
+from typing import Optional, Dict, Any
 
 API_BASE = "https://api.anwb.nl/car-information/backend-application/api/v0"
 
 
-def get_configuration_url(plate):
+def get_configuration_url(plate: str) -> Optional[Any]:
     config_url = f"{API_BASE}/licensePlate/{plate}"
     data = fetch_url(config_url, expect_json=True)
     return data
 
 
-def get_configuration_data(plate, name):
+def get_configuration_data(plate: str, name: str) -> Optional[Dict[str, Any]]:
     name_clean = name.upper()
     words = re.findall(r"\b[A-ZÀ-ÖØ-Ý]+\b", name_clean)
     synonyms = {
@@ -36,7 +37,9 @@ def get_configuration_data(plate, name):
     return None
 
 
-def get_ratelist_json(data, mileage, plate):
+def get_ratelist_json(
+    data: Optional[Dict[str, Any]], mileage: int, plate: str
+) -> Optional[Dict[str, Any]]:
     if data is None:
         return None
     cfg = data["configuration"]["id"]
@@ -58,14 +61,13 @@ def get_ratelist_json(data, mileage, plate):
         "licensePlate": plate,
         "optionsPrice": int(options_price),
     }
-
     resp = requests.get(url, params=params, timeout=15)
     resp.raise_for_status()
     rate = resp.json()
     return rate
 
 
-def get_rijklaarprijs(mileage, plate, name):
+def get_rijklaarprijs(mileage: int, plate: str, name: str) -> Optional[int]:
     data = get_configuration_data(plate, name)
     rate = get_ratelist_json(data, mileage, plate)
     if rate is None:

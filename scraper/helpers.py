@@ -1,16 +1,28 @@
 import re
+from typing import Optional, Any, Dict
 from bs4 import BeautifulSoup
 import requests
 
-def normalize_plate_number(plate):
+
+def normalize_plate_number(plate: Optional[str]) -> Optional[str]:
     if not plate:
         return None
-    return plate.replace('-', '').upper()
+    return plate.replace("-", "").upper()
 
-def extract_model_name(text):
+
+def extract_model_name(text: Optional[str]) -> Optional[str]:
     """Extracts the real model name like '1.8 Hybrid Active' from a string."""
+    if not text:
+        return None
     endings = [
-        "Active", "Business Plus", "Business", "Comfort", "Executive", "Dynamic", "Premium", "Plus"
+        "Active",
+        "Business Plus",
+        "Business",
+        "Comfort",
+        "Executive",
+        "Dynamic",
+        "Premium",
+        "Plus",
     ]
     endings_sorted = sorted(endings, key=len, reverse=True)
     ending_pattern = "|".join([re.escape(e) for e in endings_sorted])
@@ -18,8 +30,10 @@ def extract_model_name(text):
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
+    return text.strip()
 
-def fetch_html_with_cookie(url, cookies):
+
+def fetch_html_with_cookie(url: str, cookies: dict) -> Optional[str]:
     response = requests.get(url, cookies=cookies, timeout=15)
     if response.status_code == 200:
         return response.text
@@ -27,8 +41,8 @@ def fetch_html_with_cookie(url, cookies):
         print(f"Failed to fetch {url}: {response.status_code}")
         return None
 
-    
-def fetch_url(url,expect_json=False):
+
+def fetch_url(url: str, expect_json: bool = False) -> Any:
     response = requests.get(url, timeout=15)
     if response.status_code == 200:
         return response.json() if expect_json else response.text
@@ -36,8 +50,9 @@ def fetch_url(url,expect_json=False):
         print(f"Failed to fetch {url}: {response.status_code}")
         return None
 
-def extract_plate_from_url(url, cookies):
-    html=fetch_html_with_cookie(url,cookies)
+
+def extract_plate_from_url(url: Optional[str], cookies: dict) -> Optional[str]:
+    html = fetch_html_with_cookie(url, cookies)
     # ① data-testid
     m = re.search(r'data-testid="svg-Kenteken-([^"]+)"', html)
     if m:
@@ -50,27 +65,30 @@ def extract_plate_from_url(url, cookies):
         return val.get_text(strip=True)
     return None
 
-def get_apk_expiry_from_rdw(normalize_plate):
+
+def get_apk_expiry_from_rdw(normalize_plate: str) -> Optional[str]:
     url = f"https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={normalize_plate}"
     try:
         resp = requests.get(url, timeout=10)
         if resp.status_code == 200:
             data = resp.json()
-            if data and 'vervaldatum_apk' in data[0]:
-                raw = data[0]['vervaldatum_apk']
+            if data and "vervaldatum_apk" in data[0]:
+                raw = data[0]["vervaldatum_apk"]
                 return f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
     except Exception as e:
         print(f"Error fetching APK for {normalize_plate}: {e}")
     return None
 
-def get_Finnik_page(normalize_plate):
+
+def get_Finnik_page(normalize_plate: str) -> str:
     url = f"https://finnik.nl/kenteken/{normalize_plate}/gratis"
     return url
 
-def get_version_name_from_finnik(original_name, plate):
-    url   = "https://finnik.nl/kenteken/"
+
+def get_version_name_from_finnik(original_name: str, plate: str) -> str:
+    url = "https://finnik.nl/kenteken/"
     params = {"licensePlateNumber": plate}
-    headers = {"User-Agent": "Mozilla/5.0"}  
+    headers = {"User-Agent": "Mozilla/5.0"}
     resp = requests.get(url, params=params, headers=headers)
     soup = BeautifulSoup(resp.text, "html.parser")
     version_name = None
@@ -80,5 +98,5 @@ def get_version_name_from_finnik(original_name, plate):
             version_name = row.select_one(".value").get_text(strip=True)
             break
     if version_name:
-        return version_name 
+        return version_name
     return original_name
