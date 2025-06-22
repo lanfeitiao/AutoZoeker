@@ -12,13 +12,14 @@ interface CarListing {
   plate: string;
   apkExpiry?: string;
   finnikUrl?: string;
+  estimatedPrice?: number;
 }
 
 const App: React.FC = () => {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<'mileageNum' | 'priceNum'>('mileageNum');
+  const [sortField, setSortField] = useState<'mileageNum' | 'priceNum' | 'estimatedPrice'>('mileageNum');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
@@ -63,11 +64,12 @@ const App: React.FC = () => {
           Sort by:
           <select
             value={sortField}
-            onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum')}
+            onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum' | 'estimatedPrice')}
             style={{ marginLeft: 8 }}
           >
             <option value="mileageNum">Mileage</option>
             <option value="priceNum">Price</option>
+            <option value="estimatedPrice">Estimated Price</option>
           </select>
         </label>
         <label>
@@ -89,6 +91,7 @@ const App: React.FC = () => {
               <th>Name</th>
               <th>Mileage</th>
               <th>Price</th>
+              <th>Estimated Price</th>
               <th>Year</th>
               <th>Place</th>
               <th>Plate</th>
@@ -106,6 +109,7 @@ const App: React.FC = () => {
                 </td>
                 <td className="right-align">{car.mileage ? car.mileage + ' km' : 'N/A'}</td>
                 <td>{car.price ? `€${car.price}` : 'N/A'}</td>
+                <td>{typeof car.estimatedPrice === 'number' ? `€${car.estimatedPrice.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}` : 'N/A'}</td>
                 <td>{car.year ? car.year : 'N/A'}</td>
                 <td>{car.place ? car.place : 'N/A'}</td>
                 <td>{car.plate ? car.plate : 'N/A'}</td>
