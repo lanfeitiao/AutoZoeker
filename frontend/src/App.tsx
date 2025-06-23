@@ -13,6 +13,7 @@ interface CarListing {
   apkExpiry?: string;
   finnikUrl?: string;
   estimatedPrice?: number;
+  llmSummary?: string;
 }
 
 const App: React.FC = () => {
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sortField, setSortField] = useState<'mileageNum' | 'priceNum' | 'estimatedPrice'>('mileageNum');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedCar, setSelectedCar] = useState<CarListing | null>(null);
 
   useEffect(() => {
     fetch('/api/cars')
@@ -97,14 +99,15 @@ const App: React.FC = () => {
               <th>Plate</th>
               <th>APK Expiry</th>
               <th>Finnik</th>
+              <th>LLM Summary</th>
             </tr>
           </thead>
           <tbody>
             {sortedCars.map((car, idx) => (
-              <tr key={car.url || idx} className="notion-table-row">
+              <tr key={car.url || idx} className="notion-table-row" style={{ cursor: 'pointer' }} onClick={() => setSelectedCar(car)}>
                 <td>
                   {car.url && car.name ? (
-                    <a href={car.url} target="_blank" rel="noopener noreferrer">{car.name}</a>
+                    <a href={car.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>{car.name}</a>
                   ) : car.name ? car.name : 'N/A'}
                 </td>
                 <td className="right-align">{car.mileage ? car.mileage + ' km' : 'N/A'}</td>
@@ -116,14 +119,33 @@ const App: React.FC = () => {
                 <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
                 <td>
                   {car.finnikUrl ? (
-                    <a href={car.finnikUrl} target="_blank" rel="noopener noreferrer">View</a>
+                    <a href={car.finnikUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>View</a>
                   ) : 'N/A'}
+                </td>
+                <td>
+                  <button onClick={e => { e.stopPropagation(); setSelectedCar(car); }}>LLM Summary</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {selectedCar && (
+        <div className="side-panel gaspedaal-panel" onClick={e => e.stopPropagation()}>
+          <div className="side-panel-header">
+            <h2>{selectedCar.name}</h2>
+            <button className="side-panel-close" onClick={() => setSelectedCar(null)}>×</button>
+          </div>
+          <div className="side-panel-content">
+            <div><strong>Price:</strong> {selectedCar.price}</div>
+            <div><strong>Mileage:</strong> {selectedCar.mileage}</div>
+            <div style={{ marginTop: 24 }}>
+              <h3>LLM Summary</h3>
+              <div>{selectedCar.llmSummary || 'No LLM summary available for this car.'}</div>
+            </div>
+          </div>
+        </div>
+      )}
       <style>{`
         body {
           background: #f6f7f9;
@@ -209,6 +231,63 @@ const App: React.FC = () => {
         }
         .right-align {
           text-align: right !important;
+        }
+        .gaspedaal-panel {
+          background: #f7fafd;
+          border-top-left-radius: 18px;
+          border-bottom-left-radius: 18px;
+          box-shadow: -4px 0 32px rgba(0,0,0,0.10);
+          padding: 0;
+          min-width: 400px;
+          max-width: 480px;
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          margin-top: auto;
+          margin-bottom: auto;
+          max-height: 80vh;
+          height: auto;
+          top: 50%;
+          transform: translateY(-50%);
+          overflow-y: auto;
+        }
+        .side-panel-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 28px 12px 28px;
+          border-bottom: 1px solid #e3e7ee;
+          background: #f7fafd;
+          border-top-left-radius: 18px;
+        }
+        .side-panel-header h2 {
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin: 0;
+        }
+        .side-panel-close {
+          font-size: 1.7rem;
+          background: none;
+          border: none;
+          color: #888;
+          cursor: pointer;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        }
+        .side-panel-close:hover {
+          background: #e3e7ee;
+          color: #222;
+        }
+        .side-panel-content {
+          padding: 28px;
         }
       `}</style>
     </div>
