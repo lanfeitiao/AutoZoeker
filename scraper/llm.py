@@ -3,7 +3,6 @@ import os
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-from bs4 import NavigableString, Tag
 from typing import Any, Dict
 import json
 from dotenv import load_dotenv
@@ -62,28 +61,15 @@ def sanitize_html(html: str) -> str:
     Remove all attributes from HTML tags, preserving only tag structure and text.
     Returns the sanitized inner HTML of the <body> element.
     """
+    if not html:
+        return ""
     try:
         soup = BeautifulSoup(html, "html.parser")
-        body = soup.body
-        if not body:
-            return ""
+        root = soup.body or soup
 
-        new_soup = BeautifulSoup("<div></div>", "html.parser")
-        container = new_soup.div
-
-        def copy_node(node, parent):
-            if isinstance(node, NavigableString):
-                parent.append(node)
-            elif isinstance(node, Tag):
-                new_tag = new_soup.new_tag(node.name)
-                parent.append(new_tag)
-                for child in node.contents:
-                    copy_node(child, new_tag)
-
-        for child in body.contents:
-            copy_node(child, container)
-
-        return container.decode_contents()
+        for tag in root.find_all(True):
+            tag.attrs = {}
+        return "".join(str(child) for child in root.contents)
 
     except Exception as e:
         print(f"Error sanitizing HTML: {e}")
@@ -95,19 +81,25 @@ def get_llm_summary(
 ) -> str:
     sanitize_finnik = sanitize_html(finnik_html)
     prompt = f"""
-You are a professional Dutch used-car analyst. Please review the information below and 
-give a short summary of the car's pros, cons, and buying advice.
+You are a professional Dutch used-car data analysis assistant.
+Please analyze the following information about a used car from three different sources:
 
-1. Car details:
+1. **Car listing details** (e.g. price, mileage, estimated_price):
 {json.dumps(car, ensure_ascii=False, indent=2)}
 
-2. RDW data:
+2. **RDW data** (official Dutch vehicle database):
 {json.dumps(rdw_data, ensure_ascii=False, indent=2)}
 
-3. Finnik page HTML:
+3. **Finnik page HTML**:
 {sanitize_finnik}
 
-Keep the summary brief and use concise English.
+Please pay special attention to key indicators such as the vehicle's year of manufacture, 
+first registration date, APK (MOT) expiration date, mileage, ownership history, and fault history.
+Based on your professional experience, you may also evaluate any other important data.
+
+Please respond in English, stating whether it is worth purchasing, explaining your reasoning, 
+and giving a price recommendation.
+
 """
     try:
         response = openai.chat.completions.create(
@@ -128,6 +120,8 @@ if __name__ == "__main__":
     finnik_html = fetch_finnik_html(plate)
     with open("finnik.html", "w") as f:
         f.write(finnik_html)
+    with open("rdw_data.md", "w") as f:
+        f.write(json.dumps(rdw_data, ensure_ascii=False, indent=2))
     car = "gaspedaal_cars.json"
     summary = get_llm_summary(car, rdw_data, finnik_html)
     print(summary)
