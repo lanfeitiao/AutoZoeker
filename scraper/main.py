@@ -12,6 +12,10 @@ cookies = {"authId": "8a8ec16c-8399-4950-acea-7e8458b25c9e"}
 
 if __name__ == "__main__":
     if "scrape" in sys.argv:
-        scrape_and_save_raw(url, cookies)
+        success = scrape_and_save_raw(url, cookies)
+        if success:
+            print("Scraping completed successfully")
+        else:
+            print("Scraping failed")
     if "normalize" in sys.argv:
         normalize_and_save(cookies)

@@ -33,7 +33,8 @@ Thumbs.db
 # Scraper output
 scraper/*.json
 scraper/*.csv
+scraper/*.html
+scraper/*.md
+scraper/*.db
 
-# ChromeDriver binary
-scraper/chromedriver
-scraper/chromedriver.exe 
+ 
