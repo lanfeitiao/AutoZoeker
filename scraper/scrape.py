@@ -1,10 +1,10 @@
 import json
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
-
+import sqlite3
 from helpers import fetch_html_with_cookie
 
-RAW_JSON = "raw_cars.json"
+DB_PATH = "cars.db"
 
 
 def extract_raw_data_from_html(html: str) -> List[Dict[str, Any]]:
@@ -23,6 +23,55 @@ def extract_raw_data_from_html(html: str) -> List[Dict[str, Any]]:
         .get("occasions", [])
     )
     return occasions
+
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    sql = """
+        CREATE TABLE IF NOT EXISTS cars (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            price TEXT,
+            mileage TEXT,
+            url TEXT,
+            year TEXT,
+            place TEXT,
+            scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(price, mileage, url)
+        )
+    """
+    c.execute(sql)
+    conn.commit()
+    conn.close()
+
+
+def insert_new_cars(cars: List[Dict[str, Any]]):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    new_count = 0
+    for car in cars:
+        try:
+            c.execute(
+                """
+                INSERT INTO cars (title, price, mileage, url, year, place)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    car["title"],
+                    car["price"],
+                    car["mileage"],
+                    car["url"],
+                    car["year"],
+                    car["place"],
+                ),
+            )
+            new_count += 1
+        except sqlite3.IntegrityError:
+            continue
+    conn.commit()
+    conn.close()
+    print(f"Inserted {new_count} new cars into the database.")
 
 
 def scrape_and_save_raw(url: str, cookies: dict) -> None:
@@ -45,6 +94,5 @@ def scrape_and_save_raw(url: str, cookies: dict) -> None:
                 "place": occ.get("place"),
             }
         )
-    with open(RAW_JSON, "w", encoding="utf-8") as f:
-        json.dump(raw_cars, f, ensure_ascii=False, indent=2)
-    print(f"Scraped {len(raw_cars)} raw cars. Saved to {RAW_JSON}.")
+    init_db()
+    insert_new_cars(raw_cars)
