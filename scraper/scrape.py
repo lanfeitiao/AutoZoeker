@@ -2,7 +2,7 @@ import json
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 import sqlite3
-from helpers import fetch_html_with_cookie
+from helpers import fetch_html_with_cookie, clean_url
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -117,12 +117,14 @@ def process_occasions_to_cars(occasions: List[Dict[str, Any]]) -> List[Dict[str,
             other_portal = next(
                 (p for p in occ.get("portals", []) if p.get("type") == "other"), None
             )
+            raw_url = other_portal.get("url") if other_portal else None
+            url = clean_url(raw_url)
 
             car_data = {
                 "title": occ.get("title"),
                 "price": occ.get("price"),
                 "mileage": occ.get("km"),
-                "url": other_portal.get("url") if other_portal else None,
+                "url": url,
                 "year": occ.get("year"),
                 "place": occ.get("place"),
             }

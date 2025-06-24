@@ -78,3 +78,16 @@ def get_apk_expiry_from_rdw(normalize_plate: str) -> Optional[str]:
     except Exception as e:
         print(f"Error fetching APK for {normalize_plate}: {e}")
     return None
+
+
+def clean_url(raw_url: Optional[str]) -> Optional[str]:
+    """
+    Normalize placeholder URLs (e.g. 'N/A', empty strings)
+    into a real None, so they become SQL NULL.
+    """
+    if not raw_url:
+        return None
+    cleaned = raw_url.strip()
+    if cleaned.upper() in ("N/A", "NONE", "-"):
+        return None
+    return cleaned
