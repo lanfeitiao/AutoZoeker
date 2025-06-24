@@ -4,15 +4,12 @@ import asyncio
 from bs4 import BeautifulSoup
 import json
 from typing import Tuple, Any, Dict
-import re
 from dotenv import load_dotenv
 from helpers import normalize_plate_number
 from finnik import fetch_finnik_html
 from rdw import fetch_rdw_data
 
 load_dotenv()
-# openai.api_key = os.getenv("DEEPSEEK_API_KEY")
-# openai.base_url = "https://api.deepseek.com"
 
 
 def sanitize_html(html: str) -> str:
@@ -104,7 +101,7 @@ def get_report_summary_tool() -> Dict[str, Any]:
     }
 
 
-def send_messages(messages: list[dict], tools) -> Any:
+def send_messages(messages: list[dict], tools: list[dict]) -> Any:
     """
     Wrapper around Deepseek chat completion.
     """
@@ -122,13 +119,11 @@ def parse_llm_response(message: Any) -> Tuple[str, int]:
     """
     Extract llm_summary and llm_score from tool call or fallback JSON.
     """
-    # Attempt function-calling response
     tool_calls = message.tool_calls
     if tool_calls:
         call = tool_calls[0]
         raw_args = call.function.arguments or ""
     else:
-        # Fallback to plain content JSON
         raw_args = message.content or ""
     data = json.loads(raw_args)
     return data["llm_summary"], data["llm_score"]
@@ -137,10 +132,6 @@ def parse_llm_response(message: Any) -> Tuple[str, int]:
 def get_llm_summary(
     norm_car: Dict[str, Any],
 ) -> Tuple[str, int]:
-    """
-    Orchestrates prompt building, API call, and response parsing.
-    Returns (summary, score).
-    """
     tools = [get_report_summary_tool()]
     plate = normalize_plate_number(norm_car["plate"])
     rdw_data = asyncio.run(fetch_rdw_data(plate))
@@ -166,5 +157,5 @@ if __name__ == "__main__":
     with open("gaspedaal_cars.json", "r", encoding="utf-8") as f:
         cars = json.load(f)
     norm_car = next(car for car in cars if car.get("plate") == "H-401-ZX")
-    summary = get_llm_summary(norm_car)
-    print(summary)
+    llm_summary, llm_score = get_llm_summary(norm_car)
+    print(llm_summary, llm_score)
