@@ -13,6 +13,7 @@ interface CarListing {
   apkExpiry?: string;
   finnikUrl?: string;
   estimatedPrice?: number;
+  llmScore?: number;
   llmSummary?: string;
 }
 
@@ -20,7 +21,7 @@ const App: React.FC = () => {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<'mileageNum' | 'priceNum' | 'estimatedPrice'>('mileageNum');
+  const [sortField, setSortField] = useState<'mileageNum' | 'priceNum' | 'estimatedPrice'  | 'llmScore'>('mileageNum');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCar, setSelectedCar] = useState<CarListing | null>(null);
 
@@ -67,12 +68,14 @@ const App: React.FC = () => {
             Sort by:
             <select
               value={sortField}
-              onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum' | 'estimatedPrice')}
+              onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum' | 'estimatedPrice'  | 'llmScore')}
               style={{ marginLeft: 8 }}
             >
               <option value="mileageNum">Mileage</option>
               <option value="priceNum">Price</option>
               <option value="estimatedPrice">Estimated Price</option>
+              <option value="llmScore">LLM Score</option>
+
             </select>
           </label>
           <label>
@@ -96,10 +99,11 @@ const App: React.FC = () => {
                 <th>Price</th>
                 <th>Estimated Price</th>
                 <th>Year</th>
-                <th>Place</th>
                 <th>Plate</th>
                 <th>APK Expiry</th>
                 <th>Finnik</th>
+                <th>Place</th>
+                <th>LLM Score</th>
                 <th>LLM Summary</th>
               </tr>
             </thead>
@@ -115,7 +119,6 @@ const App: React.FC = () => {
                   <td>{car.price ? `€${car.price}` : 'N/A'}</td>
                   <td>{typeof car.estimatedPrice === 'number' ? `€${car.estimatedPrice.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}` : 'N/A'}</td>
                   <td>{car.year ? car.year : 'N/A'}</td>
-                  <td>{car.place ? car.place : 'N/A'}</td>
                   <td>{car.plate ? car.plate : 'N/A'}</td>
                   <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
                   <td>
@@ -123,6 +126,8 @@ const App: React.FC = () => {
                       <a href={car.finnikUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>View</a>
                     ) : 'N/A'}
                   </td>
+                  <td>{car.place ? car.place : 'N/A'}</td>
+                  <td>{car.llmScore ? car.llmScore : 'N/A'}</td>
                   <td>
                     <button onClick={e => { e.stopPropagation(); setSelectedCar(car); }}>LLM Summary</button>
                   </td>
@@ -141,6 +146,7 @@ const App: React.FC = () => {
           <div className="side-panel-content">
             <div><strong>Price:</strong> {selectedCar.price}</div>
             <div><strong>Mileage:</strong> {selectedCar.mileage}</div>
+            <div><strong>LLM Score:</strong> {selectedCar.llmScore}</div>
             <div style={{ marginTop: 24 }}>
               <h3>LLM Summary</h3>
               <div>{selectedCar.llmSummary || 'No LLM summary available for this car.'}</div>
