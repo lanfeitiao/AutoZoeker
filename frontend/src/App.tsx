@@ -55,80 +55,82 @@ const App: React.FC = () => {
   if (error) return <div className="notion-error">Error: {error}</div>;
 
   return (
-    <div className="notion-root">
-      <header className="notion-header">
-        <h1>🚗 AutoZoeker</h1>
-        <p className="notion-subtitle">Second-hand Cars in the Netherlands</p>
-      </header>
-      {/* Filter/Sort Bar */}
-      <div style={{ marginBottom: 24, display: 'flex', gap: 16, alignItems: 'center' }}>
-        <label>
-          Sort by:
-          <select
-            value={sortField}
-            onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum' | 'estimatedPrice')}
-            style={{ marginLeft: 8 }}
-          >
-            <option value="mileageNum">Mileage</option>
-            <option value="priceNum">Price</option>
-            <option value="estimatedPrice">Estimated Price</option>
-          </select>
-        </label>
-        <label>
-          Order:
-          <select
-            value={sortOrder}
-            onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
-            style={{ marginLeft: 8 }}
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
-        </label>
-      </div>
-      <div className="notion-table-container">
-        <table className="notion-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Mileage</th>
-              <th>Price</th>
-              <th>Estimated Price</th>
-              <th>Year</th>
-              <th>Place</th>
-              <th>Plate</th>
-              <th>APK Expiry</th>
-              <th>Finnik</th>
-              <th>LLM Summary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedCars.map((car, idx) => (
-              <tr key={car.url || idx} className="notion-table-row" style={{ cursor: 'pointer' }} onClick={() => setSelectedCar(car)}>
-                <td>
-                  {car.url && car.name ? (
-                    <a href={car.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>{car.name}</a>
-                  ) : car.name ? car.name : 'N/A'}
-                </td>
-                <td className="right-align">{car.mileage ? car.mileage + ' km' : 'N/A'}</td>
-                <td>{car.price ? `€${car.price}` : 'N/A'}</td>
-                <td>{typeof car.estimatedPrice === 'number' ? `€${car.estimatedPrice.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}` : 'N/A'}</td>
-                <td>{car.year ? car.year : 'N/A'}</td>
-                <td>{car.place ? car.place : 'N/A'}</td>
-                <td>{car.plate ? car.plate : 'N/A'}</td>
-                <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
-                <td>
-                  {car.finnikUrl ? (
-                    <a href={car.finnikUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>View</a>
-                  ) : 'N/A'}
-                </td>
-                <td>
-                  <button onClick={e => { e.stopPropagation(); setSelectedCar(car); }}>LLM Summary</button>
-                </td>
+    <div className="notion-root-container">
+      <div className={`notion-root${selectedCar ? ' with-panel' : ''}`}>
+        <header className="notion-header">
+          <h1>🚗 AutoZoeker</h1>
+          <p className="notion-subtitle">Second-hand Cars in the Netherlands</p>
+        </header>
+        {/* Filter/Sort Bar */}
+        <div style={{ marginBottom: 24, display: 'flex', gap: 16, alignItems: 'center' }}>
+          <label>
+            Sort by:
+            <select
+              value={sortField}
+              onChange={e => setSortField(e.target.value as 'mileageNum' | 'priceNum' | 'estimatedPrice')}
+              style={{ marginLeft: 8 }}
+            >
+              <option value="mileageNum">Mileage</option>
+              <option value="priceNum">Price</option>
+              <option value="estimatedPrice">Estimated Price</option>
+            </select>
+          </label>
+          <label>
+            Order:
+            <select
+              value={sortOrder}
+              onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
+              style={{ marginLeft: 8 }}
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </label>
+        </div>
+        <div className="notion-table-container">
+          <table className="notion-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Mileage</th>
+                <th>Price</th>
+                <th>Estimated Price</th>
+                <th>Year</th>
+                <th>Place</th>
+                <th>Plate</th>
+                <th>APK Expiry</th>
+                <th>Finnik</th>
+                <th>LLM Summary</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sortedCars.map((car, idx) => (
+                <tr key={car.url || idx} className="notion-table-row" style={{ cursor: 'pointer' }} onClick={() => setSelectedCar(car)}>
+                  <td>
+                    {car.url && car.name ? (
+                      <a href={car.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>{car.name}</a>
+                    ) : car.name ? car.name : 'N/A'}
+                  </td>
+                  <td className="right-align">{car.mileage ? car.mileage + ' km' : 'N/A'}</td>
+                  <td>{car.price ? `€${car.price}` : 'N/A'}</td>
+                  <td>{typeof car.estimatedPrice === 'number' ? `€${car.estimatedPrice.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}` : 'N/A'}</td>
+                  <td>{car.year ? car.year : 'N/A'}</td>
+                  <td>{car.place ? car.place : 'N/A'}</td>
+                  <td>{car.plate ? car.plate : 'N/A'}</td>
+                  <td>{car.apkExpiry ? car.apkExpiry : 'N/A'}</td>
+                  <td>
+                    {car.finnikUrl ? (
+                      <a href={car.finnikUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>View</a>
+                    ) : 'N/A'}
+                  </td>
+                  <td>
+                    <button onClick={e => { e.stopPropagation(); setSelectedCar(car); }}>LLM Summary</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       {selectedCar && (
         <div className="side-panel gaspedaal-panel" onClick={e => e.stopPropagation()}>
@@ -147,17 +149,80 @@ const App: React.FC = () => {
         </div>
       )}
       <style>{`
-        body {
-          background: #f6f7f9;
+        .notion-root-container {
+          display: flex;
+          flex-direction: row;
+          width: 100%;
         }
         .notion-root {
-          max-width: 900px;
+          max-width: 1200px;
           margin: 40px auto;
           padding: 32px;
           background: #fff;
           border-radius: 16px;
           box-shadow: 0 4px 24px rgba(0,0,0,0.07);
           font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+          width: 100%;
+          transition: max-width 0.3s, width 0.3s;
+          flex-basis: 100%;
+        }
+        .notion-root.with-panel {
+          max-width: none;
+          width: 75%;
+          flex-basis: 75%;
+          margin-right: 0;
+        }
+        .gaspedaal-panel {
+          background: #f7fafd;
+          border-top-left-radius: 18px;
+          border-bottom-left-radius: 18px;
+          box-shadow: -4px 0 32px rgba(0,0,0,0.10);
+          padding: 0;
+          min-width: 350px;
+          max-width: 480px;
+          width: 25%;
+          display: flex;
+          flex-direction: column;
+          height: auto;
+          max-height: 80vh;
+          overflow-y: auto;
+          z-index: 1000;
+          margin: 40px 32px 40px 0;
+        }
+        .side-panel-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 28px 12px 28px;
+          border-bottom: 1px solid #e3e7ee;
+          background: #f7fafd;
+          border-top-left-radius: 18px;
+        }
+        .side-panel-header h2 {
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin: 0;
+        }
+        .side-panel-close {
+          font-size: 1.7rem;
+          background: none;
+          border: none;
+          color: #888;
+          cursor: pointer;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        }
+        .side-panel-close:hover {
+          background: #e3e7ee;
+          color: #222;
+        }
+        .side-panel-content {
+          padding: 28px;
         }
         .notion-header {
           margin-bottom: 32px;
@@ -231,63 +296,6 @@ const App: React.FC = () => {
         }
         .right-align {
           text-align: right !important;
-        }
-        .gaspedaal-panel {
-          background: #f7fafd;
-          border-top-left-radius: 18px;
-          border-bottom-left-radius: 18px;
-          box-shadow: -4px 0 32px rgba(0,0,0,0.10);
-          padding: 0;
-          min-width: 400px;
-          max-width: 480px;
-          display: flex;
-          flex-direction: column;
-          position: fixed;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          margin-top: auto;
-          margin-bottom: auto;
-          max-height: 80vh;
-          height: auto;
-          top: 50%;
-          transform: translateY(-50%);
-          overflow-y: auto;
-        }
-        .side-panel-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 24px 28px 12px 28px;
-          border-bottom: 1px solid #e3e7ee;
-          background: #f7fafd;
-          border-top-left-radius: 18px;
-        }
-        .side-panel-header h2 {
-          font-size: 1.3rem;
-          font-weight: 600;
-          margin: 0;
-        }
-        .side-panel-close {
-          font-size: 1.7rem;
-          background: none;
-          border: none;
-          color: #888;
-          cursor: pointer;
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.2s;
-        }
-        .side-panel-close:hover {
-          background: #e3e7ee;
-          color: #222;
-        }
-        .side-panel-content {
-          padding: 28px;
         }
       `}</style>
     </div>
