@@ -154,8 +154,9 @@ def get_llm_summary(
 
 
 if __name__ == "__main__":
+    plate = "K-662-BD"
     with open("gaspedaal_cars.json", "r", encoding="utf-8") as f:
         cars = json.load(f)
-    norm_car = next(car for car in cars if car.get("plate") == "H-401-ZX")
+    norm_car = next(car for car in cars if car.get("plate") == plate)
     llm_summary, llm_score = get_llm_summary(norm_car)
     print(llm_summary, llm_score)
