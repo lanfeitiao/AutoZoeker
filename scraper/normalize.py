@@ -33,41 +33,13 @@ def normalize_car_data(raw_car: Dict[str, Any], cookies: dict) -> Dict[str, Any]
     return {
         "url": url,
         "name": name,
-        "priceNum": price_num,
-        "mileageNum": mileage_num,
+        "price_num": price_num,
+        "mileage_num": mileage_num,
         "plate": plate,
-        "apkExpiry": get_apk_expiry_from_rdw(normalize_plate),
-        "finnikUrl": finnik_url,
-        "estimatedPrice": estimated_price,
+        "apk_expiry": get_apk_expiry_from_rdw(normalize_plate),
+        "finnik_url": finnik_url,
+        "estimated_price": estimated_price,
     }
-
-
-# def normalize_and_save(cookies: dict) -> None:
-#     conn = sqlite3.connect(DB_PATH)
-#     c = conn.cursor()
-#     # Fetch all raw cars from the database
-#     c.execute("SELECT title, price, mileage, url, year, place FROM raw_cars")
-#     rows = c.fetchall()
-#     # Convert rows to dicts
-#     raw_cars = [
-#         {
-#             "title": row[0],
-#             "price": row[1],
-#             "mileage": row[2],
-#             "url": row[3],
-#             "year": row[4],
-#             "place": row[5],
-#         }
-#         for row in rows
-#     ]
-#     conn.close()
-#     normalize_cars = [normalize_car_data(car, cookies) for car in raw_cars]
-#     for raw_car in raw_cars:
-#         norm_car = normalize_car_data(raw_car, cookies)
-#         llm_summary, llm_score = get_llm_summary(norm_car)
-#     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
-#         json.dump(normalize_cars, f, ensure_ascii=False, indent=2)
-#     print(f"Normalized {len(normalize_cars)} cars. Saved to {OUTPUT_JSON}.")
 
 
 def create_normalized_table(conn):
@@ -78,12 +50,12 @@ def create_normalized_table(conn):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT UNIQUE,
             name TEXT,
-            priceNum INTEGER,
-            mileageNum INTEGER,
+            price_num INTEGER,
+            mileage_num INTEGER,
             plate TEXT,
-            apkExpiry TIMESTAMP,
-            finnikUrl TEXT,
-            estimatedPrice INTEGER,
+            apk_expiry TIMESTAMP,
+            finnik_url TEXT,
+            estimated_price INTEGER,
             llm_summary TEXT,
             llm_score INTEGER
         )
@@ -135,18 +107,18 @@ def insert_normalized_car(
     c.execute(
         """
         INSERT OR REPLACE INTO normalized_cars
-        (url, name, priceNum, mileageNum, plate, apkExpiry, finnikUrl, estimatedPrice, llm_summary, llm_score)
+        (url, name, price_num, mileage_num, plate, apk_expiry, finnik_url, estimated_price, llm_summary, llm_score)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             norm_car["url"],
             norm_car["name"],
-            norm_car["priceNum"],
-            norm_car["mileageNum"],
+            norm_car["price_num"],
+            norm_car["mileage_num"],
             norm_car["plate"],
-            norm_car["apkExpiry"],
-            norm_car["finnikUrl"],
-            norm_car["estimatedPrice"],
+            norm_car["apk_expiry"],
+            norm_car["finnik_url"],
+            norm_car["estimated_price"],
             llm_summary,
             llm_score,
         ),
