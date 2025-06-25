@@ -17,6 +17,29 @@ interface CarListing {
   llmSummary?: string;
 }
 
+function stripMarkdown(text: string) {
+  // Remove **bold**, *italic*, and trailing dots/colons
+  return text.replace(/[*_`]+/g, '').replace(/[.:]+$/, '').trim();
+}
+
+function parseLLMSummary(summary: string) {
+  if (!summary) return [];
+  // Split only at the start of the string or after a newline
+  const parts = summary.split(/(?:^|\n)(?=\d+\.\s)/g).map(s => s.trim()).filter(Boolean);
+  return parts.map(part => {
+    // Match: 5. **Final Recommendation**: or 5. Final Recommendation:
+    const match = part.match(/^(\d+)\.\s*([*`_]*[^:]+[*`_]*):?\s*(.*)$/);
+    if (match) {
+      return {
+        number: match[1],
+        heading: stripMarkdown(match[2]),
+        content: match[3].trim(),
+      };
+    }
+    return { heading: '', content: part };
+  });
+}
+
 const App: React.FC = () => {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,7 +172,20 @@ const App: React.FC = () => {
             <div><strong>LLM Score:</strong> {selectedCar.llmScore}</div>
             <div style={{ marginTop: 24 }}>
               <h3>LLM Summary</h3>
-              <div>{selectedCar.llmSummary || 'No LLM summary available for this car.'}</div>
+              {selectedCar.llmSummary ? (
+                <div className="llm-summary">
+                  {parseLLMSummary(selectedCar.llmSummary).map((section, idx) => (
+                    <div key={idx} style={{ marginBottom: '1.5em' }}>
+                      <h4 style={{ marginBottom: '0.3em' }}>
+                        {section.number ? `${section.number}. ` : ''}{section.heading}
+                      </h4>
+                      <p style={{ marginLeft: '1em' }}>{section.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div>No LLM summary available for this car.</div>
+              )}
             </div>
           </div>
         </div>
