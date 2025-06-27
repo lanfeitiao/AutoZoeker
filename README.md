@@ -1,19 +1,20 @@
-# 🚗 AutoZoeker - Car Search Website
+# 🚗 AutoZoeker - Personal Car Intelligence Assistant
 
-A web application that scrapes and displays car listings from Dutch car websites.
+A personal automation tool that aggregates car information from Dutch car websites and uses AI to help make informed purchasing decisions. Built for my own car shopping needs, AutoZoeker combines web scraping, data enrichment, and LLM consultation to analyze car listings and provide intelligent insights.
 
 ## 📸 Screenshot
 
 ![AutoZoeker Main Interface](screenshot.png)
 
-## 🚀 Features
+## Features
 
-- **Web Scraping**: Automatically scrapes car data from Gaspedaal.nl
-- **Data Enrichment**: Adds price estimates from ANWB and details from Finnik
-- **AI Analysis**: Uses deepseek to analyze car value and condition
-- **Web Interface**: Beautiful React frontend with sorting
+- **Automated Data Collection**: Scrapes car listings from Gaspedaal.nl to save manual browsing time
+- **Smart Data Enrichment**: Automatically adds ANWB price estimates and detailed specs from Finnik
+- **AI-Powered Analysis**: Consults DeepSeek LLM to evaluate each car's value proposition and condition
+- **Personal Dashboard**: Clean React interface for reviewing and comparing analyzed cars
+- **Customizable Criteria**: Easy to modify search parameters for different car preferences
 
-## 🛠️ Development Setup
+## Development Setup
 
 ### Backend
 ```bash
@@ -36,16 +37,21 @@ pip install -r requirements.txt
 python main.py scrape normalize
 ```
 
-## 📊 How It Works
+## How It Works
 
-1. **Scraper** fetches car listings from Gaspedaal.nl
-2. **Normalizer** enriches data with ANWB prices and Finnik details
-3. **AI Analyzer** evaluates each car's value proposition
-4. **Backend API** serves the processed data
-5. **Frontend** displays cars with sorting options
+This personal automation pipeline saves hours of manual car research:
 
-## 🔧 Configuration
+1. **Automated Scraping** - Fetches listings from Gaspedaal.nl based on my criteria
+2. **Data Enrichment** - Adds ANWB price estimates and detailed specs from Finnik  
+3. **LLM Consultation** - DeepSeek AI evaluates each car's value, condition, and potential issues
+4. **Personal Dashboard** - Backend API serves processed data to a React frontend
+5. **Informed Decisions** - Review AI insights and compare cars to make better purchasing choices
+
+## Configuration
+
+Personal setup notes:
 
 - Update cookies in `scraper/main.py` monthly for Gaspedaal access
-- Set OpenAI API key in `.env` for AI analysis features
-- Modify search URL in `main.py` to change car criteria
+- Set DeepSeek API key in `.env` for AI analysis features  
+- Modify search URL in `main.py` to change car search criteria
+- Adjust LLM prompts in `llm.py` to customize analysis focus
