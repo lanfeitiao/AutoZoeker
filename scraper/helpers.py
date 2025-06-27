@@ -84,10 +84,12 @@ def clean_url(raw_url: Optional[str]) -> Optional[str]:
     """
     Normalize placeholder URLs (e.g. 'N/A', empty strings)
     into a real None, so they become SQL NULL.
+    Also strips query parameters, returning only the main URL.
     """
     if not raw_url:
         return None
     cleaned = raw_url.strip()
     if cleaned.upper() in ("N/A", "NONE", "-"):
         return None
-    return cleaned
+    main_url = cleaned.split("?", 1)[0]
+    return main_url

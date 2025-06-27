@@ -156,6 +156,12 @@ def scrape_and_save_raw(url: str, cookies: dict) -> bool:
             return False
 
         init_db()
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("DELETE FROM raw_cars")
+        conn.commit()
+        conn.close()
+
         insert_raw_cars(raw_cars)
         logger.info(f"Successfully scraped and saved {len(raw_cars)} cars")
         return True

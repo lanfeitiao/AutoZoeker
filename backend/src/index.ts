@@ -27,7 +27,6 @@ app.get('/api/cars', (req, res) => {
       n.*
     FROM raw_cars r
     JOIN normalized_cars n ON r.url = n.url
-    WHERE DATE(r.scraped_at) = DATE('now', 'localtime')
   `;
 
   db.all(sql, [], (err, rows) => {
