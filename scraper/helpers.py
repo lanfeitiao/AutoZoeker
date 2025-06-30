@@ -34,6 +34,9 @@ def extract_model_name(text: Optional[str]) -> Optional[str]:
 
 
 def fetch_html_with_cookie(url: str, cookies: dict) -> Optional[str]:
+    if not url:
+        return None
+    
     response = requests.get(url, cookies=cookies, timeout=15)
     if response.status_code == 200:
         return response.text
@@ -52,7 +55,13 @@ def fetch_url(url: str, expect_json: bool = False) -> Any:
 
 
 def extract_plate_from_url(url: Optional[str], cookies: dict) -> Optional[str]:
+    if url is None:
+        return None
+    
     html = fetch_html_with_cookie(url, cookies)
+    if html is None:
+        return None
+    
     # ① data-testid
     m = re.search(r'data-testid="svg-Kenteken-([^"]+)"', html)
     if m:
