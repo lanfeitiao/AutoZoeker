@@ -2,9 +2,6 @@
 
 A personal automation tool that aggregates car information from Dutch car websites and uses AI to help make informed purchasing decisions. Built for my own car shopping needs, AutoZoeker combines web scraping, data enrichment, and LLM consultation to analyze car listings and provide intelligent insights.
 
-## 🚀 Live Demo
-Try the app here: http://51.77.183.46/
-
 ## 📸 Screenshot
 
 ![AutoZoeker Main Interface](screenshot.png)
